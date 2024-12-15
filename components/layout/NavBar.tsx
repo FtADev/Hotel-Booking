@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { useAuth, UserButton } from "@clerk/nextjs";
+import { useAuth, UserButton } from "@clerk/clerk-react";
 import Container from "../Container";
 import Image from "next/image";
 import { Button } from "../ui/button";
