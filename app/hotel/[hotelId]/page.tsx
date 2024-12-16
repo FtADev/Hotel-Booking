@@ -1,6 +1,5 @@
 import { getHotelById } from "@/actions/get/hotelById";
 import AddHotelForm, { HotelWithRooms } from "@/components/hotel/AddHotelForm";
-import { useAuth } from "@clerk/nextjs";
 import { auth } from "@clerk/nextjs/server";
 import React from "react";
 
@@ -12,10 +11,10 @@ interface HotelPageProps {
 
 const Hotel = async ({ params }: HotelPageProps) => {
     const hotel = await getHotelById(params.hotelId) as HotelWithRooms | null;
-    const {userId} = useAuth()
+    const {userId} = await auth()
     if(!userId) return <div>Not authenticated...</div>
 
-    if(hotel && hotel.userId !== userId) return <div>Access Denide...</div>
+    if(hotel && hotel.userId !== userId) return <div>Access Denided...</div>
 
   return (
     <div>
