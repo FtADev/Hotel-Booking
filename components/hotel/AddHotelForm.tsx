@@ -20,7 +20,7 @@ import { UploadButton } from "../uploadthing";
 import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
 import { Button } from "../ui/button";
-import { Loader2, Pencil, PenLine, XCircle } from "lucide-react";
+import { Eye, Loader2, Pencil, PenLine, Trash, XCircle } from "lucide-react";
 import axios from "axios";
 import { ICity, IState } from "country-state-city";
 import useLocation from "./hooks/useLocation";
@@ -77,6 +77,7 @@ const AddHotelForm = ({ hotel }: AddHotelFormProps) => {
   const { getAllCountries, getCountryStates, getStateCities } = useLocation();
   const [image, setImage] = useState<string | undefined>(hotel?.image);
   const [imageIsDeleting, setImageIsDeleting] = useState(false);
+  const [hotelIsDeleting, setHotelIsDeleting] = useState(false);
   const { toast } = useToast();
   const [states, setStates] = useState<IState[]>([]);
   const [cities, setCities] = useState<ICity[]>([]);
@@ -203,6 +204,31 @@ const AddHotelForm = ({ hotel }: AddHotelFormProps) => {
       .finally(() => {
         setImageIsDeleting(false);
       });
+  };
+
+  const handleDeleteHotel = async (hotel: HotelWithRooms) => {
+    setHotelIsDeleting(true);
+    const getImageKey = (src: string) =>
+      src.substring(src.lastIndexOf("/") + 1);
+
+    try {
+      const imageKey = getImageKey(hotel.image);
+      await axios.post("/api/uploadthing/delete", { imageKey });
+      await axios.delete(`/api/hotel/${hotel.id}`);
+      setIsLoading(false);
+      toast({
+        variant: "success",
+        description: "🎉 Hotel deleted successfully!",
+      });
+      router.push("/hotel/new");
+    } catch (err: any) {
+      console.log(err);
+      setHotelIsDeleting(false);
+      toast({
+        variant: "destructive",
+        description: `Hotel deletion could not be completed ${err.essage}`,
+      });
+    }
   };
 
   return (
@@ -628,7 +654,37 @@ const AddHotelForm = ({ hotel }: AddHotelFormProps) => {
                   </FormItem>
                 )}
               />
-              <div className="FLEX justify-between gap-2 flex-wrap">
+              <div className="flex justify-between gap-2 flex-wrap">
+                {hotel && (
+                  <Button
+                    onClick={() => handleDeleteHotel(hotel)}
+                    variant="ghost"
+                    type="button"
+                    disabled={hotelIsDeleting || isLoading}
+                    className="max-w-[150px]"
+                  >
+                    {hotelIsDeleting ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4" /> Deleting
+                      </>
+                    ) : (
+                      <>
+                        <Trash className="mr-2 h-4 w-4" /> Delete
+                      </>
+                    )}
+                  </Button>
+                )}
+
+                {hotel && (
+                  <Button
+                    onClick={() => router.push(`/hotel-details/${hotel.id}`)}
+                    variant="outline"
+                    type="button"
+                  >
+                    <Eye className="mr-2 h-4 w-4" /> View
+                  </Button>
+                )}
+
                 <Button className="max-w-[150px]" disabled={isLoading}>
                   {hotel ? (
                     <>
