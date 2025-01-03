@@ -31,6 +31,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useRouter } from "next/navigation";
 
 interface AddHotelFormProps {
   hotel: HotelWithRooms | null;
@@ -81,6 +82,7 @@ const AddHotelForm = ({ hotel }: AddHotelFormProps) => {
   const [cities, setCities] = useState<ICity[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const countries = getAllCountries();
+  const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -135,7 +137,30 @@ const AddHotelForm = ({ hotel }: AddHotelFormProps) => {
   }, [form.watch("country"), form.watch("state")]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
+    setIsLoading(true);
+    if (hotel) {
+      //update
+    } else {
+      axios
+        .post("/api/hotel", values)
+        .then((res) => {
+          toast({
+            variant: "success",
+            description: " 🎉 Hotel Created!",
+          });
+          router.push(`/hotel/${res.data.id}`);
+        })
+        .catch((err) => {
+          console.log(err);
+          toast({
+            variant: "destructive",
+            description: "Sth went wrong",
+          });
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
+    }
   }
 
   const handleDeleteImage = (image: string) => {
